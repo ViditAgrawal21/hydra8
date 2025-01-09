@@ -19,82 +19,96 @@ class HomescreenMain extends StatelessWidget {
   final VoidCallback loadPreferences;
   final String activeUnit;
 
-  const HomescreenMain(
-      {required this.prevAmount,
-      required this.activeUnit,
-      required this.prevIntake,
-      required this.intakeAmount,
-      required this.isActive,
-      required this.isSunny,
-      required this.onAdd,
-      required this.activeIntakeChange,
-      required this.sunnyIntakeChange,
-      required this.todaysDrinkAmount,
-      required this.drinkAmounts,
-      required this.loadPreferences,
-      super.key});
+  const HomescreenMain({
+    required this.prevAmount,
+    required this.activeUnit,
+    required this.prevIntake,
+    required this.intakeAmount,
+    required this.isActive,
+    required this.isSunny,
+    required this.onAdd,
+    required this.activeIntakeChange,
+    required this.sunnyIntakeChange,
+    required this.todaysDrinkAmount,
+    required this.drinkAmounts,
+    required this.loadPreferences,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TopActions(
-            activeUnit: activeUnit,
-            loadPreferences: loadPreferences,
-            isSunny: isSunny,
-            sunnyIntakeChange: sunnyIntakeChange,
-            intakeAmount: intakeAmount,
-            isActive: isActive,
-            activeIntakeChange: activeIntakeChange),
+          activeUnit: activeUnit,
+          loadPreferences: loadPreferences,
+          isSunny: isSunny,
+          sunnyIntakeChange: sunnyIntakeChange,
+          intakeAmount: intakeAmount,
+          isActive: isActive,
+          activeIntakeChange: activeIntakeChange,
+        ),
         Expanded(
           child: SingleChildScrollView(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height - 220,
+              height:
+                  MediaQuery.of(context).size.height -
+                  AppBar().preferredSize.height -
+                  kBottomNavigationBarHeight,
+
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width < 450
-                        ? MediaQuery.of(context).size.width
-                        : 450,
-                    height: MediaQuery.of(context).size.width < 450
-                        ? MediaQuery.of(context).size.width
-                        : 450,
+                    width:
+                        MediaQuery.of(context).size.width < 450
+                            ? MediaQuery.of(context).size.width
+                            : 450,
+                    height:
+                        MediaQuery.of(context).size.width < 450
+                            ? MediaQuery.of(context).size.width
+                            : 450,
                     child: Progress(
-                        activeUnit: activeUnit,
-                        prevAmount: prevAmount,
-                        prevIntake: prevIntake,
-                        intakeAmount: int.parse(intakeAmount.toString()) +
-                            (isSunny
-                                ? getIntakeChangeDifference(activeUnit)
-                                : 0) +
-                            (isActive
-                                ? getIntakeChangeDifference(activeUnit)
-                                : 0),
-                        todaysAmount: todaysDrinkAmount),
+                      activeUnit: activeUnit,
+                      prevAmount: prevAmount,
+                      prevIntake: prevIntake,
+                      intakeAmount:
+                          int.parse(intakeAmount.toString()) +
+                          (isSunny
+                              ? getIntakeChangeDifference(activeUnit)
+                              : 0) +
+                          (isActive
+                              ? getIntakeChangeDifference(activeUnit)
+                              : 0),
+                      todaysAmount: todaysDrinkAmount,
+                    ),
                   ),
                   drinkAmounts.isEmpty
                       ? const SizedBox(height: 110)
                       : RecentDrinks(
-                          onAdd: onAdd,
-                          recentDrinks: drinkAmounts.length < 2
-                              ? drinkAmounts.reversed.toList()
-                              : drinkAmounts.length >= 5
-                                  ? drinkAmounts
-                                      .sublist(drinkAmounts.length - 4,
-                                          drinkAmounts.length)
-                                      .reversed
-                                      .toList()
-                                  : drinkAmounts
-                                      .sublist(0, drinkAmounts.length)
-                                      .reversed
-                                      .toList()),
+                        onAdd: onAdd,
+                        recentDrinks:
+                            drinkAmounts.length < 2
+                                ? drinkAmounts.reversed.toList()
+                                : drinkAmounts.length >= 5
+                                ? drinkAmounts
+                                    .sublist(
+                                      drinkAmounts.length - 4,
+                                      drinkAmounts.length,
+                                    )
+                                    .reversed
+                                    .toList()
+                                : drinkAmounts
+                                    .sublist(0, drinkAmounts.length)
+                                    .reversed
+                                    .toList(),
+                      ),
                 ],
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -126,9 +140,11 @@ class TopActions extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          border: const BorderDirectional(
-              bottom: BorderSide(color: Color.fromRGBO(0, 0, 0, 0.1)))),
+        color: Theme.of(context).colorScheme.surface,
+        border: const BorderDirectional(
+          bottom: BorderSide(color: Color.fromRGBO(0, 0, 0, 0.1)),
+        ),
+      ),
       width: MediaQuery.of(context).size.width,
       child: Material(
         type: MaterialType.transparency,
@@ -141,11 +157,13 @@ class TopActions extends StatelessWidget {
               child: Text(
                 "Today's Progress",
                 style: TextStyle(
-                    color: isDarkTheme
-                        ? Colors.white
-                        : const Color.fromRGBO(0, 0, 0, 0.75),
-                    fontSize: 17,
-                    fontWeight: FontWeight.normal),
+                  color:
+                      isDarkTheme
+                          ? Colors.white
+                          : const Color.fromRGBO(0, 0, 0, 0.75),
+                  fontSize: 17,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
             ),
             Row(
@@ -153,71 +171,89 @@ class TopActions extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
                   child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: isSunny
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color:
+                          isSunny
                               ? Theme.of(context).primaryColor
-                              : Colors.transparent),
-                      child: IconButton(
-                          splashColor: Colors.transparent,
-                          tooltip: "Sunny Day",
-                          iconSize: 20,
-                          onPressed: () {
-                            if (!isSunny) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text(
-                                    'Water Intake: ${isSunny ? "-${getIntakeChangeDifference(activeUnit)}" : "+${getIntakeChangeDifference(activeUnit)}"}$activeUnit (hot day)'),
-                                behavior: SnackBarBehavior.floating,
-                              ));
-                            }
-                            sunnyIntakeChange(intakeAmount, isActive, isSunny);
-                          },
-                          icon: Icon(
-                            Icons.sunny,
-                            color: isSunny
+                              : Colors.transparent,
+                    ),
+                    child: IconButton(
+                      splashColor: Colors.transparent,
+                      tooltip: "Sunny Day",
+                      iconSize: 20,
+                      onPressed: () {
+                        if (!isSunny) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Water Intake: ${isSunny ? "-${getIntakeChangeDifference(activeUnit)}" : "+${getIntakeChangeDifference(activeUnit)}"}$activeUnit (hot day)',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                        sunnyIntakeChange(intakeAmount, isActive, isSunny);
+                      },
+                      icon: Icon(
+                        Icons.sunny,
+                        color:
+                            isSunny
                                 ? Colors.white
                                 : isDarkTheme
-                                    ? Colors.white70
-                                    : const Color.fromRGBO(0, 0, 0, 0.2),
-                          ))),
+                                ? Colors.white70
+                                : const Color.fromRGBO(0, 0, 0, 0.2),
+                      ),
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
-                      top: 10, bottom: 10, right: 10, left: 10),
+                    top: 10,
+                    bottom: 10,
+                    right: 10,
+                    left: 10,
+                  ),
                   child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: isActive
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color:
+                          isActive
                               ? Theme.of(context).primaryColor
-                              : Colors.transparent),
-                      child: IconButton(
-                          iconSize: 20,
-                          splashColor: Colors.transparent,
-                          tooltip: "Active Day",
-                          onPressed: () {
-                            if (!isActive) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text(
-                                    'Water Intake: ${isActive ? "-${getIntakeChangeDifference(activeUnit)}" : "+${getIntakeChangeDifference(activeUnit)}"}$activeUnit (active day)'),
-                                behavior: SnackBarBehavior.floating,
-                              ));
-                            }
-                            activeIntakeChange(intakeAmount, isSunny, isActive);
-                          },
-                          icon: Icon(
-                            Icons.directions_bike_outlined,
-                            color: isActive
+                              : Colors.transparent,
+                    ),
+                    child: IconButton(
+                      iconSize: 20,
+                      splashColor: Colors.transparent,
+                      tooltip: "Active Day",
+                      onPressed: () {
+                        if (!isActive) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Water Intake: ${isActive ? "-${getIntakeChangeDifference(activeUnit)}" : "+${getIntakeChangeDifference(activeUnit)}"}$activeUnit (active day)',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                        activeIntakeChange(intakeAmount, isSunny, isActive);
+                      },
+                      icon: Icon(
+                        Icons.directions_bike_outlined,
+                        color:
+                            isActive
                                 ? Colors.white
                                 : isDarkTheme
-                                    ? Colors.white70
-                                    : const Color.fromRGBO(0, 0, 0, 0.2),
-                          ))),
+                                ? Colors.white70
+                                : const Color.fromRGBO(0, 0, 0, 0.2),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

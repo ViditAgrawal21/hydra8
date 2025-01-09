@@ -39,94 +39,85 @@ class NavBar extends StatelessWidget {
                     color: isDarkTheme
                         ? const Color(0xff4B4B4B)
                         : const Color.fromRGBO(0, 0, 0, 0.1)))),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 70,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 1,
-                          child: Tooltip(
-                            message: "History",
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                  foregroundColor: Colors.grey, splashFactory: NoSplash.splashFactory),
-                              onPressed: () {
-                                setPage(1);
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.bar_chart,
-                                    size: 28,
-                                    color: activeIndex == 1
-                                        ? isDarkTheme
-                                            ? Colors.white
-                                            : Colors.black87
-                                        : isDarkTheme
-                                            ? Colors.white38
-                                            : const Color.fromRGBO(
-                                                0, 0, 0, 0.3),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: 70,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AspectRatio(
+                            aspectRatio: 1,
+                            child: Tooltip(
+                              message: "History",
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                    foregroundColor: Colors.grey, splashFactory: NoSplash.splashFactory),
+                                onPressed: () {
+                                  setPage(1);
+                                },
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.bar_chart,
+                                        size: 28,
+                                        color: activeIndex == 1
+                                            ? isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black87
+                                            : isDarkTheme
+                                                ? Colors.white38
+                                                : const Color.fromRGBO(
+                                                    0, 0, 0, 0.3),
+                                      ),
+                                      Text(
+                                        "History",
+                                        style: TextStyle(
+                                          color: activeIndex == 1
+                                              ? isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black87
+                                              : isDarkTheme
+                                                  ? Colors.white38
+                                                  : const Color.fromRGBO(
+                                                      0, 0, 0, 0.3),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                  Text(
-                                    "History",
-                                    style: TextStyle(
-                                      color: activeIndex == 1
-                                          ? isDarkTheme
-                                              ? Colors.white
-                                              : Colors.black87
-                                          : isDarkTheme
-                                              ? Colors.white38
-                                              : const Color.fromRGBO(
-                                                  0, 0, 0, 0.3),
-                                    ),
-                                  )
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 1,
-                          child: Tooltip(
-                            message: "Home",
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                  foregroundColor: Colors.grey, splashFactory: NoSplash.splashFactory),
-                              onPressed: () {
-                                setPage(0);
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.apps,
-                                    size: 28,
-                                    color: activeIndex == 0
-                                        ? isDarkTheme
-                                            ? Colors.white
-                                            : Colors.black87
-                                        : isDarkTheme
-                                            ? Colors.white38
-                                            : const Color.fromRGBO(
-                                                0, 0, 0, 0.3),
-                                  ),
-                                  Text(
-                                    "Home",
-                                    style: TextStyle(
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AspectRatio(
+                            aspectRatio: 1,
+                            child: Tooltip(
+                              message: "Home",
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                    foregroundColor: Colors.grey, splashFactory: NoSplash.splashFactory),
+                                onPressed: () {
+                                  setPage(0);
+                                },
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.apps,
+                                      size: 28,
                                       color: activeIndex == 0
                                           ? isDarkTheme
                                               ? Colors.white
@@ -136,93 +127,18 @@ class NavBar extends StatelessWidget {
                                               : const Color.fromRGBO(
                                                   0, 0, 0, 0.3),
                                     ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 1.1,
-                          child: Tooltip(
-                            message: "Settings",
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                  foregroundColor: Colors.grey, splashFactory: NoSplash.splashFactory),
-                              onPressed: () async {
-                                final bool result = await Navigator.pushNamed(
-                                    context, SettingsScreen.routeName) as bool;
-                                if (result) {
-                                  loadPreferences();
-                                }
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.settings,
-                                    size: 28,
-                                    color: isDarkTheme
-                                        ? Colors.white38
-                                        : const Color.fromRGBO(0, 0, 0, 0.3),
-                                  ),
-                                  Text(
-                                    "Settings",
-                                    style: TextStyle(
-                                      color: isDarkTheme
-                                          ? Colors.white38
-                                          : const Color.fromRGBO(0, 0, 0, 0.3),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  /* Expanded(
-                    child: Opacity(
-                      opacity: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AspectRatio(
-                            aspectRatio: 1,
-                            child: Tooltip(
-                              message: "Settings",
-                              child: TextButton(
-                                style: TextButton.styleFrom(
-                                    splashFactory: NoSplash.splashFactory,
-                                    primary: Colors.grey),
-                                onPressed: () {
-                                  setPage(1);
-                                },
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.settings,
-                                      size: 28,
-                                      color: activeIndex == 1
-                                          ? Colors.black87
-                                          : const Color.fromRGBO(0, 0, 0, 0.3),
-                                    ),
                                     Text(
-                                      "Settings",
+                                      "Home",
                                       style: TextStyle(
-                                          color: activeIndex == 1
-                                              ? Colors.black87
-                                              : const Color.fromRGBO(
-                                                  0, 0, 0, 0.3)),
+                                        color: activeIndex == 0
+                                            ? isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black87
+                                            : isDarkTheme
+                                                ? Colors.white38
+                                                : const Color.fromRGBO(
+                                                    0, 0, 0, 0.3),
+                                      ),
                                     )
                                   ],
                                 ),
@@ -232,11 +148,99 @@ class NavBar extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ) */
-                ],
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AspectRatio(
+                            aspectRatio: 1.1,
+                            child: Tooltip(
+                              message: "Settings",
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                    foregroundColor: Colors.grey, splashFactory: NoSplash.splashFactory),
+                                onPressed: () async {
+                                  final bool result = await Navigator.pushNamed(
+                                      context, SettingsScreen.routeName) as bool;
+                                  if (result) {
+                                    loadPreferences();
+                                  }
+                                },
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.settings,
+                                      size: 28,
+                                      color: isDarkTheme
+                                          ? Colors.white38
+                                          : const Color.fromRGBO(0, 0, 0, 0.3),
+                                    ),
+                                    Text(
+                                      "Settings",
+                                      style: TextStyle(
+                                        color: isDarkTheme
+                                            ? Colors.white38
+                                            : const Color.fromRGBO(0, 0, 0, 0.3),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    /* Expanded(
+                      child: Opacity(
+                        opacity: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            AspectRatio(
+                              aspectRatio: 1,
+                              child: Tooltip(
+                                message: "Settings",
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                      splashFactory: NoSplash.splashFactory,
+                                      primary: Colors.grey),
+                                  onPressed: () {
+                                    setPage(1);
+                                  },
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.settings,
+                                        size: 28,
+                                        color: activeIndex == 1
+                                            ? Colors.black87
+                                            : const Color.fromRGBO(0, 0, 0, 0.3),
+                                      ),
+                                      Text(
+                                        "Settings",
+                                        style: TextStyle(
+                                            color: activeIndex == 1
+                                                ? Colors.black87
+                                                : const Color.fromRGBO(
+                                                    0, 0, 0, 0.3)),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ) */
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

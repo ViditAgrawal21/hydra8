@@ -33,7 +33,7 @@ class AboutScreen extends StatelessWidget {
             height: 130,
           ),
           Text(
-            "Minimal Water Tracker",
+            "Hydra8",
             style: TextStyle(
                 fontSize: 20,
                 color: isDarkTheme
@@ -54,21 +54,21 @@ class AboutScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               await launchUrl(Uri.parse(
-                  "https://sites.google.com/view/minimal-water-tracker-privacy/startseite"));
+                  "https://github.com/ViditAgrawal21/Hydra88"));
             },
             style: TextButton.styleFrom(
                 foregroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5))),
             child: const Text("Privacy Policy"),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
-            child: AttributionTile(
-                url:
-                    "https://www.freepik.com/free-vector/collection-beverage-vectors_2800691.htm#query=soda%20bottle&position=21&from_view=keyword",
-                urlText: "Collection of beverage vectors",
-                sourceText: "rawpixel.com on Freepik"),
-          ),
+          // const Padding(
+          //   padding: EdgeInsets.symmetric(horizontal: 40),
+          //   child: AttributionTile(
+          //       url:
+          //           "https://www.freepik.com/free-vector/collection-beverage-vectors_2800691.htm#query=soda%20bottle&position=21&from_view=keyword",
+          //       urlText: "Collection of beverage vectors",
+          //       sourceText: "rawpixel.com on Freepik"),
+          // ),
           const SizedBox(
             height: 100,
           ),
