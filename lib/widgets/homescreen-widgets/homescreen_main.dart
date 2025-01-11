@@ -55,7 +55,6 @@ class HomescreenMain extends StatelessWidget {
                   MediaQuery.of(context).size.height -
                   AppBar().preferredSize.height -
                   kBottomNavigationBarHeight,
-
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

@@ -16,6 +16,7 @@ import 'package:workmanager/workmanager.dart';
 import '../boxes.dart';
 import '../widgets/setup-widgets/calculate_dialog.dart';
 import '../widgets/setup-widgets/reminder_time_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = "/settings";
@@ -44,10 +45,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       activeUnit = prefs.getString("unit") ?? "";
       notificationsActive = prefs.getBool("reminders_active") ?? false;
-      selectedStartReminderTime =
-          stringToTimeOfDay(prefs.getString("reminder_start_time") ?? "9:00");
-      selectedFinishReminderTime =
-          stringToTimeOfDay(prefs.getString("reminder_finish_time") ?? "21:00");
+      selectedStartReminderTime = stringToTimeOfDay(
+        prefs.getString("reminder_start_time") ?? "9:00",
+      );
+      selectedFinishReminderTime = stringToTimeOfDay(
+        prefs.getString("reminder_finish_time") ?? "21:00",
+      );
       selectedReminderInterval = prefs.getInt("reminder_interval") ?? 1;
       _currentGoal = prefs.getInt("intake_amount") ?? 2000;
     });
@@ -55,62 +58,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void openReminderDialog(context) {
     showDialog(
-        context: context,
-        builder: (BuildContext ctx) {
-          return Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-            child: Container(
-                padding: const EdgeInsets.all(20),
-                child: ReminderTimeDialog(
-                  selectedReminderInterval: selectedReminderInterval,
-                  selectedFinishReminderTime: selectedFinishReminderTime,
-                  selectedStartReminderTime: selectedStartReminderTime,
-                  setEndTime: (TimeOfDay newTime) {
-                    setState(() {
-                      selectedFinishReminderTime = newTime;
-                    });
-                  },
-                  setStartTime: (TimeOfDay newTime) {
-                    setState(() {
-                      selectedStartReminderTime = newTime;
-                    });
-                  },
-                  setInterval: (int newInterval) {
-                    setState(() {
-                      selectedReminderInterval = newInterval;
-                    });
-                  },
-                )),
-          );
-        }).then(
-      (value) async {
-        if (value) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setInt("reminder_interval", selectedReminderInterval);
-          prefs.setString("reminder_start_time",
-              formatTimeOfDay(selectedStartReminderTime));
-          prefs.setString("reminder_finish_time",
-              formatTimeOfDay(selectedFinishReminderTime));
-          setReminders();
-        }
+      context: context,
+      builder: (BuildContext ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: ReminderTimeDialog(
+              selectedReminderInterval: selectedReminderInterval,
+              selectedFinishReminderTime: selectedFinishReminderTime,
+              selectedStartReminderTime: selectedStartReminderTime,
+              setEndTime: (TimeOfDay newTime) {
+                setState(() {
+                  selectedFinishReminderTime = newTime;
+                });
+              },
+              setStartTime: (TimeOfDay newTime) {
+                setState(() {
+                  selectedStartReminderTime = newTime;
+                });
+              },
+              setInterval: (int newInterval) {
+                setState(() {
+                  selectedReminderInterval = newInterval;
+                });
+              },
+            ),
+          ),
+        );
       },
-    );
+    ).then((value) async {
+      if (value) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setInt("reminder_interval", selectedReminderInterval);
+        prefs.setString(
+          "reminder_start_time",
+          formatTimeOfDay(selectedStartReminderTime),
+        );
+        prefs.setString(
+          "reminder_finish_time",
+          formatTimeOfDay(selectedFinishReminderTime),
+        );
+        setReminders();
+      }
+    });
   }
 
   void setReminders() async {
     await Workmanager().cancelAll();
-    await Workmanager()
-        .initialize(remindersCallbackDispatcher, isInDebugMode: false);
-    await Workmanager().registerPeriodicTask("reminder", "Reminder",
-        inputData: {
-          "start_hour": selectedStartReminderTime.hour,
-          "start_minute": selectedStartReminderTime.minute,
-          "finish_hour": selectedFinishReminderTime.hour,
-          "finish_minute": selectedFinishReminderTime.minute,
-          "init_time": TimeOfDay.now().toString(),
-        },
-        frequency: getDurationFromIntervalInt(selectedReminderInterval));
+    await Workmanager().initialize(
+      remindersCallbackDispatcher,
+      isInDebugMode: false,
+    );
+    await Workmanager().registerPeriodicTask(
+      "reminder",
+      "Reminder",
+      inputData: {
+        "start_hour": selectedStartReminderTime.hour,
+        "start_minute": selectedStartReminderTime.minute,
+        "finish_hour": selectedFinishReminderTime.hour,
+        "finish_minute": selectedFinishReminderTime.minute,
+        "init_time": TimeOfDay.now().toString(),
+      },
+      frequency: getDurationFromIntervalInt(selectedReminderInterval),
+    );
   }
 
   @override
@@ -138,37 +149,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void showCalculateDialog() {
     showDialog(
-        context: context,
-        builder: (BuildContext context) => Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: Wrap(
-                children: [
-                  CalculateDialog(
-                    setIntake: (int value) {
-                      setState(() {
-                        _currentGoal = value;
-                      });
-                    },
-                    activeUnit: activeUnit,
-                  ),
-                ],
-              ),
-            ));
+      context: context,
+      builder:
+          (BuildContext context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Wrap(
+              children: [
+                CalculateDialog(
+                  setIntake: (int value) {
+                    setState(() {
+                      _currentGoal = value;
+                    });
+                  },
+                  activeUnit: activeUnit,
+                ),
+              ],
+            ),
+          ),
+    );
   }
 
   void showUnitDialog() {
     showDialog(
-        context: context,
-        builder: (BuildContext ctx) {
-          return Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Wrap(
-                children: [
-                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      context: context,
+      builder: (BuildContext ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Wrap(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     // const Row(
                     //   children: [
                     //     Text(
@@ -178,9 +195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     //     ),
                     //   ],
                     // ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
                     ListTile(
                       contentPadding: const EdgeInsets.all(0),
                       onTap: () {
@@ -198,57 +213,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       ),
                     ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.all(0),
-                      onTap: () {
-                        setUnit("oz UK");
-                        Navigator.pop(context);
-                      },
-                      title: const Text("UK System (fl. oz)"),
-                      leading: Radio<String>(
-                        activeColor: Theme.of(context).primaryColor,
-                        value: "oz UK",
-                        groupValue: activeUnit,
-                        onChanged: (String? value) {
-                          setUnit(value as String);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.all(0),
-                      onTap: () {
-                        setUnit("oz US");
-                        Navigator.pop(context);
-                      },
-                      title: const Text("US System (fl. oz)"),
-                      leading: Radio<String>(
-                        activeColor: Theme.of(context).primaryColor,
-                        value: "oz US",
-                        groupValue: activeUnit,
-                        onChanged: (String? value) {
-                          setUnit(value as String);
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
+                    // ListTile(
+                    //   contentPadding: const EdgeInsets.all(0),
+                    //   onTap: () {
+                    //     setUnit("oz UK");
+                    //     Navigator.pop(context);
+                    //   },
+                    //   title: const Text("UK System (fl. oz)"),
+                    //   leading: Radio<String>(
+                    //     activeColor: Theme.of(context).primaryColor,
+                    //     value: "oz UK",
+                    //     groupValue: activeUnit,
+                    //     onChanged: (String? value) {
+                    //       setUnit(value as String);
+                    //       Navigator.pop(context);
+                    //     },
+                    //   ),
+                    // ),
+                    // ListTile(
+                    //   contentPadding: const EdgeInsets.all(0),
+                    //   onTap: () {
+                    //     setUnit("oz US");
+                    //     Navigator.pop(context);
+                    //   },
+                    //   title: const Text("US System (fl. oz)"),
+                    //   leading: Radio<String>(
+                    //     activeColor: Theme.of(context).primaryColor,
+                    //     value: "oz US",
+                    //     groupValue: activeUnit,
+                    //     onChanged: (String? value) {
+                    //       setUnit(value as String);
+                    //       Navigator.pop(context);
+                    //     },
+                    //   ),
+                    // ),
                     TextButton(
                       style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColor, padding: const EdgeInsets.symmetric(horizontal: 20),
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadiusDirectional.circular(8))),
+                        foregroundColor: Theme.of(context).primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusDirectional.circular(8),
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
                       child: const Text("Cancel"),
                     ),
-                  ]),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   void clearData(context) async {
@@ -258,22 +277,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await preferences.clear();
     await Workmanager().cancelAll();
     Navigator.pushNamedAndRemoveUntil(
-        context, StartupNavigation.routeName, (route) => false);
+      context,
+      StartupNavigation.routeName,
+      (route) => false,
+    );
   }
 
   void showThemeModal(context) async {
     showDialog(
-        context: context,
-        builder: (BuildContext ctx) {
-          final themeProvider = Provider.of<ThemeProvider>(context);
-          return Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Wrap(
-                children: [
-                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+      context: context,
+      builder: (BuildContext ctx) {
+        final themeProvider = Provider.of<ThemeProvider>(context);
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Wrap(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     // const Row(
                     //   children: [
                     //     Text(
@@ -283,14 +308,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     //     ),
                     //   ],
                     // ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
                     ListTile(
                       contentPadding: const EdgeInsets.all(0),
                       onTap: () {
-                        final themeProvider =
-                            Provider.of<ThemeProvider>(context, listen: false);
+                        final themeProvider = Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        );
                         themeProvider.setTheme(ThemeMode.dark);
                         Navigator.pop(context);
                       },
@@ -307,8 +332,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ListTile(
                       contentPadding: const EdgeInsets.all(0),
                       onTap: () {
-                        final themeProvider =
-                            Provider.of<ThemeProvider>(context, listen: false);
+                        final themeProvider = Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        );
                         themeProvider.setTheme(ThemeMode.light);
                         Navigator.pop(context);
                       },
@@ -325,8 +352,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ListTile(
                       contentPadding: const EdgeInsets.all(0),
                       onTap: () {
-                        final themeProvider =
-                            Provider.of<ThemeProvider>(context, listen: false);
+                        final themeProvider = Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        );
                         themeProvider.setTheme(ThemeMode.system);
                         Navigator.pop(context);
                       },
@@ -342,62 +371,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColor, padding: const EdgeInsets.symmetric(horizontal: 20),
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadiusDirectional.circular(8))),
+                        foregroundColor: Theme.of(context).primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusDirectional.circular(8),
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
                       child: const Text("Cancel"),
                     ),
-                  ]),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   void showDeleteDialog(context) async {
-    final bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
-      builder: (BuildContext ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-        title: const Text('Delete All Data'),
-        content: const Text(
-            'Are you sure you want to delete all data. This is not reversable'),
-        contentPadding: const EdgeInsets.only(left: 20, bottom: 5, right: 20),
-        titlePadding:
-            const EdgeInsets.only(top: 20, left: 20, bottom: 5, right: 15),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-                foregroundColor: isDarkTheme ? Colors.white60 : Colors.black54, padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
-            child: const Text('Cancel'),
+      builder:
+          (BuildContext ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+            title: const Text('Delete All Data'),
+            content: const Text('Are you sure you want to delete all data?'),
+            contentPadding: const EdgeInsets.only(
+              left: 20,
+              bottom: 5,
+              right: 20,
+            ),
+            titlePadding: const EdgeInsets.only(
+              top: 20,
+              left: 20,
+              bottom: 5,
+              right: 15,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor:
+                      isDarkTheme ? Colors.white60 : Colors.black54,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 25,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  clearData(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 25,
+                  ),
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              clearData(context);
-            },
-            style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 25), backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
-            child: const Text('Delete',
-                style: TextStyle(
-                  color: Colors.white,
-                )),
-          ),
-        ],
-      ),
     );
   }
 
@@ -409,7 +463,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final Map<String, String> unitTexts = {
       "ml": "Metric System (L/ml)",
       "oz UK": "UK System (fl. oz)",
-      "oz US": "US System (fl. oz)"
+      "oz US": "US System (fl. oz)",
     };
 
     return WillPopScope(
@@ -419,127 +473,161 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-            toolbarHeight: 40,
-            systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarColor: Theme.of(context).scaffoldBackgroundColor,
-                statusBarIconBrightness:
-                    isDarkTheme ? Brightness.light : Brightness.dark),
-            title: const Text("Settings"),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context, true),
-            )),
+          toolbarHeight: 40,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Theme.of(context).scaffoldBackgroundColor,
+            statusBarIconBrightness:
+                isDarkTheme ? Brightness.light : Brightness.dark,
+          ),
+          title: const Text("Settings"),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ),
         body: SingleChildScrollView(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 56, bottom: 10),
-              child: Text(
-                "General",
-                style: TextStyle(
-                    fontSize: 16, color: Theme.of(context).primaryColor),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Container(
+                margin: const EdgeInsets.only(left: 56, bottom: 10),
+                child: Text(
+                  "General",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
               ),
-            ),
-            SettingsItem(
+              SettingsItem(
                 onTap: showUnitDialog,
                 title: "Unit System",
-                subtitle: unitTexts.containsKey(activeUnit)
-                    ? unitTexts[activeUnit] as String
-                    : "asdf",
-                icon: Icons.calculate_outlined),
-            SettingsItem(
-              onTap: () {
-                Navigator.pushNamed(context, IntakeGoalScreen.routeName)
-                    .then((value) async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  setState(() {
-                    _currentGoal = prefs.getInt("intake_amount") ?? 0;
-                  });
-                });
-              },
-              title: "Intake Goal",
-              subtitle: '$_currentGoal$activeUnit',
-              icon: Icons.flag_outlined,
-            ),
-            Divider(
-              color: isDarkTheme ? Colors.white12 : const Color(0xffE4E4E4),
-              thickness: 1,
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 56, bottom: 10, top: 10),
-              child: Text(
-                "Reminders",
-                style: TextStyle(
-                    fontSize: 16, color: Theme.of(context).primaryColor),
+                subtitle:
+                    unitTexts.containsKey(activeUnit)
+                        ? unitTexts[activeUnit] as String
+                        : "asdf",
+                icon: Icons.calculate_outlined,
               ),
-            ),
-            SettingsItem(
+              SettingsItem(
                 onTap: () {
-                  Navigator.pushNamed(context, DrinkReminderScreen.routeName)
-                      .then((value) => loadData());
+                  Navigator.pushNamed(context, IntakeGoalScreen.routeName).then(
+                    (value) async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      setState(() {
+                        _currentGoal = prefs.getInt("intake_amount") ?? 0;
+                      });
+                    },
+                  );
+                },
+                title: "Intake Goal",
+                subtitle: '$_currentGoal$activeUnit',
+                icon: Icons.flag_outlined,
+              ),
+              Divider(
+                color: isDarkTheme ? Colors.white12 : const Color(0xffE4E4E4),
+                thickness: 1,
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 56, bottom: 10, top: 10),
+                child: Text(
+                  "Reminders",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              SettingsItem(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    DrinkReminderScreen.routeName,
+                  ).then((value) => loadData());
                 },
                 title: "Drink Reminders",
-                subtitle: notificationsActive
-                    ? 'Intervall - ${getReminderIntervalText(selectedReminderInterval)}'
-                    : 'Disabled',
-                icon: Icons.local_drink_outlined),
-            SettingsItem(
+                subtitle:
+                    notificationsActive
+                        ? 'Intervall - ${getReminderIntervalText(selectedReminderInterval)}'
+                        : 'Disabled',
+                icon: Icons.local_drink_outlined,
+              ),
+              SettingsItem(
                 onTap: () {
                   Navigator.pushNamed(context, ReminderTimesScreen.routeName);
                 },
                 title: "Reminder Times",
                 subtitle: "Start and end times",
-                icon: Icons.access_time),
-            Divider(
-              color: isDarkTheme ? Colors.white12 : const Color(0xffE4E4E4),
-              thickness: 1,
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 56, bottom: 10, top: 10),
-              child: Text(
-                "More",
-                style: TextStyle(
-                    fontSize: 16, color: Theme.of(context).primaryColor),
+                icon: Icons.access_time,
               ),
-            ),
-            SettingsItem(
+              Divider(
+                color: isDarkTheme ? Colors.white12 : const Color(0xffE4E4E4),
+                thickness: 1,
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 56, bottom: 10, top: 10),
+                child: Text(
+                  "More",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              SettingsItem(
                 onTap: () {
                   showThemeModal(context);
                 },
                 title: "Appearance",
-                subtitle: themeProvider.theme.name[0].toUpperCase() +
+                subtitle:
+                    themeProvider.theme.name[0].toUpperCase() +
                     themeProvider.theme.name.substring(1),
-                icon: Icons.brightness_6_outlined),
-            SettingsItem(
+                icon: Icons.brightness_6_outlined,
+              ),
+              SettingsItem(
                 onTap: () {
                   showDeleteDialog(context);
                 },
                 title: "Delete All Data",
                 subtitle: "Full Reset",
-                icon: Icons.delete_outline),
-            SettingsItem(
+                icon: Icons.delete_outline,
+              ),
+              SettingsItem(
                 onTap: () async {
                   await launchUrl(
-                      Uri.parse("mailto:agrawalvidit656@gmail.com"));
+                    Uri.parse("mailto:agrawalvidit656@gmail.com"),
+                  );
                 },
                 title: "Contact",
                 subtitle: "agrawalvidit656@gmail.com",
-                icon: Icons.email_outlined),
-            SettingsItem(
+                icon: Icons.email_outlined,
+              ),
+              SettingsItem(
                 onTap: () {
                   Navigator.pushNamed(context, AboutScreen.routeName);
                 },
                 title: "About",
                 subtitle: "v1.0.4",
-                icon: Icons.info_outline),
-            /* ExpansionPanelList(
+                icon: Icons.info_outline,
+              ),
+              SettingsItem(
+                onTap: () async {
+                  // Sign out the user from Firebase
+                  await FirebaseAuth.instance.signOut();
+
+                  // Navigate to the start screen
+                  Navigator.pushReplacementNamed(context, '/start_screen');
+                },
+                title: "Logout",
+                subtitle: "Sign out from your account",
+                icon:
+                    Icons
+                        .logout, // Use an appropriate logout icon (optional red icon for logout)
+              ),
+              /* ExpansionPanelList(
               elevation: 1,
               dividerColor: Colors.black12,
               expandedHeaderPadding: const EdgeInsets.all(0),
@@ -863,8 +951,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ), */
-          ],
-        )),
+            ],
+          ),
+        ),
       ),
     );
   }

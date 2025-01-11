@@ -157,7 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: isDarkTheme
             ? const Color(0xff2D2D2D)
             : const Color.fromRGBO(0, 0, 0, 0.03),
-        body: Center(          
+        body: Center(
+          
           child: HomescreenMain(
             activeUnit: widget.activeUnit,
             loadPreferences: widget.loadPreferences,

@@ -37,7 +37,7 @@ class _StartupNavigationState extends State<StartupNavigation> {
           physics: const NeverScrollableScrollPhysics(),
           controller: pageController,
           children: [
-            StartScreen((int index) => pageController.animateToPage(index,
+            StartScreen((dynamic index) => pageController.animateToPage(index,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut)),
             const SetupScreen(),

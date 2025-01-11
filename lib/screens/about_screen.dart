@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../widgets/aboutscreen-widgets/attribution_tile.dart';
 
 class AboutScreen extends StatelessWidget {
   static const routeName = "/about";

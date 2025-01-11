@@ -9,8 +9,7 @@ class SettingsItem extends StatelessWidget {
       {required this.onTap,
       required this.subtitle,
       required this.title,
-      required this.icon,
-      super.key});
+      required this.icon,});
 
   @override
   Widget build(BuildContext context) {
