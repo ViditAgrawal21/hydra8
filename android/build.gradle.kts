@@ -1,7 +1,13 @@
-allprojects {
+buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://dl.bintray.com/android/android-tools") }
+    }
+        dependencies {
+        // Add the Google services plugin here
+        classpath("com.android.tools.build:gradle:7.0.4")
+        classpath("com.google.gms:google-services:4.4.2")  // Make sure to specify the correct version
     }
 }
 
