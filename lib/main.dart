@@ -18,17 +18,21 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: FirebaseOptions(
-      apiKey: "AIzaSyCqdy7iLGr28aHDRIrWyREs52yUZbc30dU",
-      authDomain: "hydra8-b53ab.firebaseapp.com",
-      projectId: "hydra8-b53ab",
-      storageBucket: "hydra8-b53ab.firebasestorage.app",
-      messagingSenderId: "958237253833",
-      appId: "1:958237253833:web:212464f2a39077cbd1ed18",
-      measurementId: "G-F4VVC5HYYJ",
-    ),
-  ); // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: "AIzaSyCqdy7iLGr28aHDRIrWyREs52yUZbc30dU",
+        authDomain: "hydra8-b53ab.firebaseapp.com",
+        projectId: "hydra8-b53ab",
+        storageBucket: "hydra8-b53ab.firebasestorage.app",
+        messagingSenderId: "958237253833",
+        appId: "1:958237253833:web:212464f2a39077cbd1ed18",
+        measurementId: "G-F4VVC5HYYJ",
+      ),
+    );
+  } catch (e) {
+    print("Firebase initialization error: $e");
+  } // Initialize Firebase
   //* Initialize Hive Database
   await Hive.initFlutter();
   Hive.registerAdapter(DrinkAmountAdapter());
