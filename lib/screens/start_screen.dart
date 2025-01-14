@@ -19,6 +19,8 @@ class _StartScreenState extends State<StartScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLogin = true;
   bool _isLoading = false;
   bool _isPasswordVisible = false; // To toggle password visibility
@@ -142,10 +144,13 @@ class _StartScreenState extends State<StartScreen> {
   Future<void> _signUpWithEmailPassword() async {
     toggleLoading();
     try {
+      // Try to create a new user with the provided email and password
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
+
+      // Show success message
       setState(() {
         _responseMessage = 'Account created successfully';
         _isLoading = false;
@@ -153,16 +158,48 @@ class _StartScreenState extends State<StartScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => SetupScreen(),
-        ), // Replace with your desired screen
+        MaterialPageRoute(builder: (context) => SetupScreen()),
       );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (e.code == 'email-already-in-use') {
+        // Show a dialog if the email is already in use
+        _showErrorDialog(
+          "This email address is already associated with another account.",
+        );
+      } else {
+        // Show any other error message
+        _showErrorDialog("An error occurred: ${e.message}");
+      }
     } catch (e) {
       setState(() {
         _responseMessage = 'Error: $e';
         _isLoading = false;
       });
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -217,17 +254,61 @@ class _StartScreenState extends State<StartScreen> {
                         ),
                         const SizedBox(height: 15), // Added spacing
                         TextFormField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            labelText: "Phone Number",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter your phone number";
+                            }
+                            // Regular expression to validate phone number (Country code + 10 digits)
+                            if (!RegExp(
+                              r'^\+?[1-9]\d{1,14}$',
+                            ).hasMatch(value)) {
+                              return "Please enter a valid phone number with country code (+countrycode10digits)";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
                           controller: _birthDateController,
+                          readOnly:
+                              true, // Makes the field read-only so manual typing is disabled
                           decoration: InputDecoration(
                             labelText: "Birth Date (YYYY-MM-DD)",
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.calendar_today),
+                              onPressed: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(
+                                    1900,
+                                  ), // Earliest date allowed
+                                  lastDate:
+                                      DateTime.now(), // Latest date allowed
+                                );
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    _birthDateController.text =
+                                        "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                                  });
+                                }
+                              },
+                            ),
                           ),
-                          keyboardType: TextInputType.datetime,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Please enter your birth date";
+                              return "Please select your birth date";
                             }
                             return null;
                           },
@@ -281,12 +362,51 @@ class _StartScreenState extends State<StartScreen> {
                           if (value == null || value.isEmpty) {
                             return "Please enter your password";
                           }
-                          if (value.length < 6) {
-                            return "Password must be at least 6 characters long";
+                          // Check if the password contains at least one lowercase letter, one uppercase letter, and one number
+                          if (!RegExp(
+                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$',
+                          ).hasMatch(value)) {
+                            return "Password must contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character";
                           }
                           return null;
                         },
                       ),
+                      const SizedBox(height: 15),
+                      // Confirm Password field (Only for Sign-Up)
+                      if (!_isLogin) ...[
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: !_isPasswordVisible,
+                          decoration: InputDecoration(
+                            labelText: "Confirm Password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please confirm your password";
+                            }
+                            if (value != _passwordController.text) {
+                              return "Passwords do not match";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                      ],
                       const SizedBox(height: 20),
                       if (_isLoading)
                         const CircularProgressIndicator()

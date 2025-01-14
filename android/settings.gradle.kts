@@ -23,3 +23,7 @@ plugins {
 }
 
 include(":app")
+
+// // Include google_sign_in_android module
+// include(":google_sign_in_android")
+// project(":google_sign_in_android").projectDir = file("${rootProject.projectDir}/build/google_sign_in_android")

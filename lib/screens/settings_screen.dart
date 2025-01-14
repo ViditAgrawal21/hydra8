@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_app/screens/start_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_app/helpers/helpers.dart';
@@ -619,7 +620,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   await FirebaseAuth.instance.signOut();
 
                   // Navigate to the start screen
-                  Navigator.pushReplacementNamed(context, '/start_screen');
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => StartScreen(() {
+                            // Define what should happen when `changePage` is called
+                            print("Logout Succesfully!");
+                          }),
+                    ),
+                  );
                 },
                 title: "Logout",
                 subtitle: "Sign out from your account",
