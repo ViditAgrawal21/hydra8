@@ -23,6 +23,7 @@ class _StartScreenState extends State<StartScreen> {
       TextEditingController();
   bool _isLogin = true;
   bool _isLoading = false;
+  bool _rememberMe = false; // To keep track of the Remember Me checkbox state
   bool _isPasswordVisible = false; // To toggle password visibility
   String _responseMessage = '';
 
@@ -117,27 +118,145 @@ class _StartScreenState extends State<StartScreen> {
 
   Future<void> _loginWithEmailPassword() async {
     toggleLoading();
+
     try {
+      // Attempt to log in with the provided email and password
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
+
+      // Update UI on successful login
       setState(() {
         _responseMessage = 'Logged in successfully';
         _isLoading = false;
       });
 
+      // Navigate to the setup screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => SetupScreen(),
-        ), // Replace with your desired screen
+        MaterialPageRoute(builder: (context) => SetupScreen()),
       );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Debug log to confirm error code
+      debugPrint('FirebaseAuthException: ${e.code}');
+
+      // Handle specific FirebaseAuth errors
+      if (e.code == 'wrong-password') {
+        _showErrorDialogWithActions(
+          'Password is incorrect. Please try again or reset your password.',
+          showResetOption: true, // Ensure this flag is set to true
+        );
+      } else if (e.code == 'user-not-found') {
+        _showErrorDialogWithActions(
+          'No user found with this email.',
+          showResetOption: false, // No reset option needed
+        );
+      } else {
+        _showErrorDialogWithActions(
+          'An error occurred: ${e.message}',
+          showResetOption: false,
+        );
+      }
     } catch (e) {
+      // Handle any other exceptions
       setState(() {
         _responseMessage = 'Error: $e';
         _isLoading = false;
       });
+    }
+  }
+
+  void _showErrorDialogWithActions(
+    String message, {
+    bool showResetOption = false,
+  }) {
+    // Error dialog with optional Reset Password button
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Login Failed'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Try Again'),
+            ),
+            if (showResetOption) // Conditionally show the Reset Password button
+              TextButton(
+                onPressed: _resetPassword, // Trigger password reset
+                child: const Text('Reset Password'),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _resetPassword() async {
+    // Ensure email is entered before attempting a password reset
+    String email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showErrorDialogWithActions(
+        'Please enter your email to reset the password.',
+        showResetOption: false,
+      );
+      return;
+    }
+
+    try {
+      // Send the password reset email
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      // Show success confirmation dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Password Reset'),
+            content: const Text(
+              'A password reset email has been sent. Please check your inbox and follow the instructions to reset your password.',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      // Handle any errors during the reset process
+      String errorMessage = 'An unknown error occurred.';
+      if (e is FirebaseAuthException) {
+        switch (e.code) {
+          case 'invalid-email':
+            errorMessage = 'The email address is badly formatted.';
+            break;
+          case 'user-not-found':
+            errorMessage = 'No user found for that email address.';
+            break;
+          case 'network-request-failed':
+            errorMessage = 'Network error. Please try again later.';
+            break;
+          default:
+            errorMessage =
+                'Failed to send password reset email. Error: ${e.message}';
+            break;
+        }
+      }
+
+      _showErrorDialogWithActions(errorMessage, showResetOption: false);
     }
   }
 
@@ -237,6 +356,7 @@ class _StartScreenState extends State<StartScreen> {
                   child: Column(
                     children: [
                       if (!_isLogin) ...[
+                        // Name field
                         TextFormField(
                           controller: _nameController,
                           decoration: InputDecoration(
@@ -252,7 +372,8 @@ class _StartScreenState extends State<StartScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 15), // Added spacing
+                        const SizedBox(height: 15),
+                        // Phone Number field
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
@@ -266,7 +387,6 @@ class _StartScreenState extends State<StartScreen> {
                             if (value == null || value.isEmpty) {
                               return "Please enter your phone number";
                             }
-                            // Regular expression to validate phone number (Country code + 10 digits)
                             if (!RegExp(
                               r'^\+?[1-9]\d{1,14}$',
                             ).hasMatch(value)) {
@@ -276,10 +396,10 @@ class _StartScreenState extends State<StartScreen> {
                           },
                         ),
                         const SizedBox(height: 15),
+                        // Birth Date field
                         TextFormField(
                           controller: _birthDateController,
-                          readOnly:
-                              true, // Makes the field read-only so manual typing is disabled
+                          readOnly: true,
                           decoration: InputDecoration(
                             labelText: "Birth Date (YYYY-MM-DD)",
                             border: OutlineInputBorder(
@@ -291,11 +411,8 @@ class _StartScreenState extends State<StartScreen> {
                                 DateTime? pickedDate = await showDatePicker(
                                   context: context,
                                   initialDate: DateTime.now(),
-                                  firstDate: DateTime(
-                                    1900,
-                                  ), // Earliest date allowed
-                                  lastDate:
-                                      DateTime.now(), // Latest date allowed
+                                  firstDate: DateTime(1900),
+                                  lastDate: DateTime.now(),
                                 );
                                 if (pickedDate != null) {
                                   setState(() {
@@ -313,8 +430,9 @@ class _StartScreenState extends State<StartScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 15), // Added spacing
+                        const SizedBox(height: 15),
                       ],
+                      // Email field
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -337,6 +455,7 @@ class _StartScreenState extends State<StartScreen> {
                         },
                       ),
                       const SizedBox(height: 15),
+                      // Password field
                       TextFormField(
                         controller: _passwordController,
                         obscureText: !_isPasswordVisible,
@@ -362,7 +481,6 @@ class _StartScreenState extends State<StartScreen> {
                           if (value == null || value.isEmpty) {
                             return "Please enter your password";
                           }
-                          // Check if the password contains at least one lowercase letter, one uppercase letter, and one number
                           if (!RegExp(
                             r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$',
                           ).hasMatch(value)) {
@@ -372,7 +490,7 @@ class _StartScreenState extends State<StartScreen> {
                         },
                       ),
                       const SizedBox(height: 15),
-                      // Confirm Password field (Only for Sign-Up)
+                      // Confirm Password field (only for sign-up)
                       if (!_isLogin) ...[
                         TextFormField(
                           controller: _confirmPasswordController,
@@ -407,6 +525,25 @@ class _StartScreenState extends State<StartScreen> {
                         ),
                         const SizedBox(height: 15),
                       ],
+                      // Remember Me checkbox
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                              });
+                            },
+                          ),
+                          const Text("Remember Me"),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: _resetPassword,
+                            child: const Text("Forgot Password?"),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 20),
                       if (_isLoading)
                         const CircularProgressIndicator()
@@ -457,7 +594,7 @@ class _StartScreenState extends State<StartScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: EdgeInsets.all(3),
+                            padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
@@ -468,7 +605,7 @@ class _StartScreenState extends State<StartScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
+                          const Text(
                             'Continue with Google',
                             style: TextStyle(
                               color: Colors.white,

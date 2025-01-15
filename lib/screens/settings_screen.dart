@@ -616,27 +616,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               SettingsItem(
                 onTap: () async {
-                  // Sign out the user from Firebase
-                  await FirebaseAuth.instance.signOut();
-
-                  // Navigate to the start screen
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => StartScreen(() {
-                            // Define what should happen when `changePage` is called
-                            print("Logout Succesfully!");
-                          }),
-                    ),
+                  // Show a confirmation dialog
+                  final shouldLogout = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Confirm Logout'),
+                        content: Text('Are you sure you want to log out?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              // If the user cancels, close the dialog and return false
+                              Navigator.of(context).pop(false);
+                            },
+                            child: Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // If the user confirms, close the dialog and return true
+                              Navigator.of(context).pop(true);
+                            },
+                            child: Text('Logout'),
+                          ),
+                        ],
+                      );
+                    },
                   );
+                  // If the user confirmed, proceed with logout
+                  if (shouldLogout == true) {
+                    await FirebaseAuth.instance.signOut();
+
+                    // Navigate to the start screen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => StartScreen(() {
+                              print("Logout Successfully!");
+                            }),
+                      ),
+                    );
+                  }
                 },
                 title: "Logout",
                 subtitle: "Sign out from your account",
-                icon:
-                    Icons
-                        .logout, // Use an appropriate logout icon (optional red icon for logout)
+                icon: Icons.logout, // Use an appropriate logout icon
               ),
+
               /* ExpansionPanelList(
               elevation: 1,
               dividerColor: Colors.black12,
