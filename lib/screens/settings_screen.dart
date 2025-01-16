@@ -503,6 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
+              
               SettingsItem(
                 onTap: showUnitDialog,
                 title: "Unit System",

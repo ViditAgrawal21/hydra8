@@ -7,6 +7,7 @@ import 'package:my_app/screens/settings-screens/reminder_times_screen.dart';
 import 'package:my_app/screens/settings_screen.dart';
 import 'package:my_app/screens/setup_screen.dart';
 import 'package:my_app/screens/startup_navigation.dart';
+import 'package:my_app/screens/user_profile_screen.dart'; // Import the UserProfileScreen
 import '../screens/home_screen.dart';
 import '../screens/navigation_controller.dart';
 import '../screens/statistics_screen.dart';
@@ -48,6 +49,13 @@ Route<dynamic> generateRoutes(settings) {
       return PageTransition(
         isIos: true,
         child: const SettingsScreen(),
+        type: PageTransitionType.rightToLeftWithFade,
+        settings: settings,
+      );
+    case UserProfileScreen.routeName: // Add UserProfileScreen route
+      return PageTransition(
+        isIos: true,
+        child:  UserProfileScreen(),
         type: PageTransitionType.rightToLeftWithFade,
         settings: settings,
       );
