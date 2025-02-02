@@ -24,9 +24,8 @@ class BluetoothSettingsScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 16), // Spacing after title
 
-                // Check if there is any error
+                // Display error message if any
                 if (bluetoothProvider.getErrorMessage != null) ...[
-                  // Show error message if available
                   SnackBar(
                     content: Text(bluetoothProvider.getErrorMessage!),
                     backgroundColor: Colors.red,
@@ -48,21 +47,19 @@ class BluetoothSettingsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16), // Add space after ListTile
                 ] else ...[
-                  // If not connected, show the scan button
+                  // Show "Start Scan" button if not connected
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 14.0),
                       minimumSize: Size(double.infinity, 48),
                     ),
                     onPressed: bluetoothProvider.isScanning
-                        ? null // Disable button if already scanning
+                        ? null
                         : () async {
                             await bluetoothProvider.startScan();
                           },
                     child: bluetoothProvider.isScanning
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : const Text('Start Scan', style: TextStyle(fontSize: 16)),
                   ),
                   SizedBox(height: 16), // Add space after button
@@ -73,16 +70,16 @@ class BluetoothSettingsScreen extends StatelessWidget {
                     SizedBox(height: 16),
                   ],
 
-                  // If available devices are found, show the list
+                  // Show available devices list if found
                   if (bluetoothProvider.availableDevices.isNotEmpty) ...[
                     SizedBox(
-                      height: 200, // Set a max height for the list
+                      height: 200,
                       child: ListView.builder(
                         itemCount: bluetoothProvider.availableDevices.length,
                         itemBuilder: (context, index) {
                           final device = bluetoothProvider.availableDevices[index].device;
                           return Card(
-                            elevation: 4, // Add shadow to each list item
+                            elevation: 4,
                             margin: EdgeInsets.symmetric(vertical: 8.0),
                             child: ListTile(
                               contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -107,7 +104,7 @@ class BluetoothSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ] else ...[
-                    // Show message if no devices are found
+                    // Show message if no devices found
                     Center(
                       child: Text(
                         "No devices found.",
