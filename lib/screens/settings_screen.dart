@@ -18,6 +18,7 @@ import '../boxes.dart';
 import '../widgets/setup-widgets/calculate_dialog.dart';
 import '../widgets/setup-widgets/reminder_time_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_app/screens/bluetooth_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = "/settings";
@@ -503,7 +504,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-              
+
+              Divider(
+                color: isDarkTheme ? Colors.white12 : const Color(0xffE4E4E4),
+                thickness: 1,
+              ),
+              SettingsItem(
+                onTap: () {
+                  // Navigate to the Bluetooth settings screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BluetoothSettingsScreen(),
+                    ),
+                  );
+                },
+                title: "Add a Device",
+                subtitle: "Connect a new Bluetooth device",
+                icon: Icons.bluetooth,
+              ),
               SettingsItem(
                 onTap: showUnitDialog,
                 title: "Unit System",
@@ -663,331 +682,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: "Sign out from your account",
                 icon: Icons.logout, // Use an appropriate logout icon
               ),
-
-              /* ExpansionPanelList(
-              elevation: 1,
-              dividerColor: Colors.black12,
-              expandedHeaderPadding: const EdgeInsets.all(0),
-              expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  if (index == 0) {
-                    unitIsExpanded = !isExpanded;
-                  }
-                  if (index == 1) {
-                    intakeIsExpanded = !isExpanded;
-                  }
-                  if (index == 2) {
-                    remindersIsExpanded = !remindersIsExpanded;
-                  }
-                });
-              },
-              children: [
-                ExpansionPanel(
-                  canTapOnHeader: true,
-                  isExpanded: unitIsExpanded,
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return ListTile(
-                      title: Text("Unit $activeUnit"),
-                    );
-                  },
-                  body: Container(
-                    padding: const EdgeInsets.only(
-                        left: 20, right: 20, bottom: 20, top: 5),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setUnit("ml");
-                            },
-                            style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                primary: activeUnit == "ml"
-                                    ? Theme.of(context).primaryColor
-                                    : const Color(0xffEFEFEF),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(40),
-                                        bottomLeft: Radius.circular(40)))),
-                            child: Text(
-                              "ml",
-                              style: TextStyle(
-                                  color: activeUnit == "ml"
-                                      ? Colors.white
-                                      : const Color(0xff767676)),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setUnit("oz UK");
-                            },
-                            style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                primary: activeUnit == "oz UK"
-                                    ? Theme.of(context).primaryColor
-                                    : const Color(0xffEFEFEF),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only())),
-                            child: Text(
-                              "oz UK",
-                              style: TextStyle(
-                                  color: activeUnit == "oz UK"
-                                      ? Colors.white
-                                      : const Color(0xff767676)),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setUnit("oz US");
-                            },
-                            style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                primary: activeUnit == "oz US"
-                                    ? Theme.of(context).primaryColor
-                                    : const Color(0xffEFEFEF),
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(40),
-                                        bottomRight: Radius.circular(40)))),
-                            child: Text(
-                              "oz US",
-                              style: TextStyle(
-                                  color: activeUnit == "oz US"
-                                      ? Colors.white
-                                      : const Color(0xff767676)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                ExpansionPanel(
-                  canTapOnHeader: true,
-                  isExpanded: intakeIsExpanded,
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return const ListTile(
-                      title: Text("Intake Amount"),
-                    );
-                  },
-                  body: Container(
-                    padding: const EdgeInsets.only(
-                        left: 20, right: 20, bottom: 20, top: 5),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            NumberPicker(
-                                minValue: activeUnit == "ml" ? 50 : 5,
-                                maxValue: activeUnit == "ml" ? 10000000 : 70000,
-                                itemHeight: 50,
-                                textStyle: const TextStyle(
-                                    color: Color.fromRGBO(0, 0, 0, 0.3),
-                                    fontSize: 18),
-                                selectedTextStyle: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 18),
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            width: 1.5,
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                        top: BorderSide(
-                                            width: 1.5,
-                                            color: Theme.of(context)
-                                                .primaryColor))),
-                                value: _currentGoal,
-                                itemCount: 3,
-                                step: activeUnit == "ml" ? 50 : 5,
-                                haptics: true,
-                                onChanged: (value) {
-                                  setGoal(value);
-                                  setState(() {
-                                    _currentGoal = value;
-                                  });
-                                }),
-                            Text(
-                              activeUnit,
-                              style: TextStyle(
-                                  fontSize: 19,
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () => showCalculateDialog(),
-                            style: ElevatedButton.styleFrom(
-                                primary: Theme.of(context).primaryColor,
-                                padding: const EdgeInsets.all(15),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10))),
-                            child: const Text(
-                              "Calculate",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                ExpansionPanel(
-                  canTapOnHeader: true,
-                  isExpanded: remindersIsExpanded,
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return const ListTile(
-                      title: Text("Reminders"),
-                    );
-                  },
-                  body: Column(
-                    children: [
-                      SwitchListTile(
-                          controlAffinity: ListTileControlAffinity.trailing,
-                          contentPadding:
-                              const EdgeInsets.only(left: 20, right: 20),
-                          activeColor: Theme.of(context).primaryColor,
-                          value: notificationsActive,
-                          title: const Text("Activate Reminders"),
-                          onChanged: (bool newValue) async {
-                            if (newValue) {
-                              if (await Permission.notification
-                                  .request()
-                                  .isGranted) {
-                                setState(() {
-                                  notificationsActive = newValue;
-                                });
-                                SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
-                                prefs.setBool("reminders_active", newValue);
-                                setReminders();
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "Please allow notifications in settings for this app")));
-                              }
-                            } else {
-                              setState(() {
-                                notificationsActive = newValue;
-                              });
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              prefs.setBool("reminders_active", newValue);
-                              Workmanager().cancelAll();
-                            }
-                          }),
-                      !notificationsActive
-                          ? Container()
-                          : SizedBox(
-                              width: double.infinity,
-                              child: InkWell(
-                                onTap: () {
-                                  openReminderDialog(context);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(children: [
-                                    Text(
-                                      "${formatTimeOfDay(selectedStartReminderTime)} - ${formatTimeOfDay(selectedFinishReminderTime)}",
-                                      style: const TextStyle(
-                                          color: Colors.black87, fontSize: 23),
-                                    ),
-                                    Text(
-                                      getReminderIntervalText(
-                                          selectedReminderInterval),
-                                      style: const TextStyle(
-                                          color: Colors.black54, fontSize: 12),
-                                    )
-                                  ]),
-                                ),
-                              ),
-                            ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      Navigator.pushNamed(context, AboutScreen.routeName);
-                    },
-                    style: ButtonStyle(
-                      elevation: MaterialStateProperty.all(0),
-                      overlayColor: MaterialStateProperty.all(Colors.black12),
-                      backgroundColor:
-                          MaterialStateProperty.all(const Color(0xffefefef)),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      )),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Icon(
-                          Icons.info_outline,
-                          color: Color(0xff767676),
-                        ),
-                        Text(
-                          "More Information",
-                          style: TextStyle(color: Color(0xff767676)),
-                        ),
-                        SizedBox(),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: () => showDeleteDialog(context),
-                    style: ButtonStyle(
-                      elevation: MaterialStateProperty.all(0),
-                      overlayColor: MaterialStateProperty.all(Colors.black12),
-                      backgroundColor: MaterialStateProperty.all(
-                          Theme.of(context).primaryColor),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      )),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Icon(
-                          Icons.delete_outline,
-                          color: Colors.white,
-                        ),
-                        Text(
-                          "Delete All Data",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        SizedBox(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ), */
             ],
           ),
         ),

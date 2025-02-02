@@ -12,8 +12,7 @@ import 'package:my_app/screens/startup_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
-
-
+import 'package:my_app/helpers/bluetooth_helper.dart'; // Import BluetoothHelper
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,24 +104,32 @@ class _MyAppState extends State<MyApp> {
         systemNavigationBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light)); */
 
-    return ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      builder: (context, _) {
-        final themeProvider = Provider.of<ThemeProvider>(context);
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(
+          create: (context) => BluetoothHelper(),
+        ), // ✅ Add BluetoothHelper here
+      ],
+      child: Builder(
+        builder: (context) {
+          final themeProvider = Provider.of<ThemeProvider>(context);
 
-        return MaterialApp(
-          color: Colors.white,
-          debugShowCheckedModeBanner: false,
-          title: 'Hydra8',
-          themeMode: themeProvider.theme,
-          darkTheme: MyThemes.darkTheme,
-          theme: MyThemes.lightTheme,
-          home:_intakeAmount == -1
-                  ? const StartupNavigation()
-                  : const NavigationController(initIndex: 0),
-          onGenerateRoute: generateRoutes,
-        );
-      },
+          return MaterialApp(
+            color: Colors.white,
+            debugShowCheckedModeBanner: false,
+            title: 'Hydra8',
+            themeMode: themeProvider.theme,
+            darkTheme: MyThemes.darkTheme,
+            theme: MyThemes.lightTheme,
+            home:
+                _intakeAmount == -1
+                    ? const StartupNavigation()
+                    : const NavigationController(initIndex: 0),
+            onGenerateRoute: generateRoutes,
+          );
+        },
+      ),
     );
   }
 }
