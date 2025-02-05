@@ -23,11 +23,11 @@ Hydra8 is a smart hydration tracking app that helps users monitor their daily wa
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/Hydra8.git
+   git clone https://github.com/ViditAgrawal21/Hydra8.git
    ```
 2. Navigate to the project directory:
    ```sh
-   cd Hydra8
+   cd my_app
    ```
 3. Install dependencies:
    ```sh
