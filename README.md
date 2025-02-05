@@ -85,5 +85,5 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 For support or inquiries, reach out to:
 - Email: agrawalvidit656@gmail.com
-- GitHub Issues: [Create an issue](https://github.com/ViditAgrawal21/Hydra8/issues)
+- GitHub Issues: [Create an issue](https://github.com/ViditAgrawal21/Hydra88/issues)
 
