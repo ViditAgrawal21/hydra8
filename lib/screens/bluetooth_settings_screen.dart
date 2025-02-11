@@ -1,116 +1,146 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:my_app/helpers/bluetooth_helper.dart'; // import your BluetoothHelper
+import 'package:my_app/helpers/bluetooth_helper.dart';
 
 class BluetoothSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Bluetooth Device')),
+      appBar: AppBar(
+        title: const Text('Bluetooth Settings'),
+        backgroundColor: Colors.blue,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0), // Add padding around the body
+        padding: const EdgeInsets.all(16.0),
         child: Consumer<BluetoothHelper>(
           builder: (context, bluetoothProvider, child) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Section title
+                // 🔹 Section title
                 Text(
-                  "Bluetooth Device",
+                  "Connect to Your Device",
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor,
+                        fontSize: 22,
                       ),
                 ),
-                SizedBox(height: 16), // Spacing after title
+                const SizedBox(height: 16),
 
-                // Display error message if any
-                if (bluetoothProvider.getErrorMessage != null) ...[
-                  SnackBar(
-                    content: Text(bluetoothProvider.getErrorMessage!),
-                    backgroundColor: Colors.red,
+                // 🔹 Show error message if no connection and not scanning
+                if (!bluetoothProvider.isConnected && !bluetoothProvider.isScanning) ...[
+                  Center(
+                    child: Text(
+                      "No device connected. Please start scanning.",
+                      style: TextStyle(color: Colors.red, fontSize: 16),
+                    ),
                   ),
+                  const SizedBox(height: 16),
                 ],
 
-                // Show connection status if connected
-                if (bluetoothProvider.isConnected()) ...[
+                // 🔹 Show connection status if device is connected
+                if (bluetoothProvider.isConnected) ...[
                   ListTile(
-                    leading: Icon(Icons.bluetooth_connected, color: Colors.blue),
-                    title: Text('Connected to: ${bluetoothProvider.connectedDevice?.name ?? "Unknown"}'),
-                    subtitle: Text("Tap to disconnect"),
+                    leading: const Icon(Icons.bluetooth_connected, color: Colors.green),
+                    title: Text('Connected to: ${bluetoothProvider.deviceName}'),
+                    subtitle: const Text("Tap to disconnect"),
                     trailing: IconButton(
-                      icon: Icon(Icons.close, color: Colors.red),
+                      icon: const Icon(Icons.close, color: Colors.red),
                       onPressed: () {
-                        bluetoothProvider.stopScan(); // Disconnect from the device
+                        bluetoothProvider.disconnect();
                       },
                     ),
                   ),
-                  SizedBox(height: 16), // Add space after ListTile
+                  const SizedBox(height: 16),
+
+                  // 🔹 Show latest weight if available
+                  Center(
+                    child: Column(
+                      children: [
+                        const Text("Latest Weight:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(
+                          "${bluetoothProvider.weight} g",
+                          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.blue),
+                        ),
+                      ],
+                    ),
+                  ),
                 ] else ...[
-                  // Show "Start Scan" button if not connected
+                  // 🔹 Show scan button if not connected
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14.0),
-                      minimumSize: Size(double.infinity, 48),
+                      padding: const EdgeInsets.symmetric(vertical: 14.0),
+                      minimumSize: const Size(double.infinity, 48),
+                      backgroundColor: Colors.blue.shade700, // Darker blue for better visibility
+                      textStyle: const TextStyle(fontSize: 16),
                     ),
                     onPressed: bluetoothProvider.isScanning
                         ? null
                         : () async {
-                            await bluetoothProvider.startScan();
+                            // Start scanning process
+                            await bluetoothProvider.startScan(context); // Pass context here
                           },
                     child: bluetoothProvider.isScanning
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Start Scan', style: TextStyle(fontSize: 16)),
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              ),
+                              SizedBox(width: 10),
+                              Text("Scanning..."),
+                            ],
+                          ) // Show scanning loader and text
+                        : const Text('Start Scanning'),
                   ),
-                  SizedBox(height: 16), // Add space after button
+                  const SizedBox(height: 16),
 
-                  // Show loading indicator while scanning
+                  // 🔹 Show scanning indicator
                   if (bluetoothProvider.isScanning) ...[
-                    Center(child: CircularProgressIndicator()),
-                    SizedBox(height: 16),
-                  ],
-
-                  // Show available devices list if found
-                  if (bluetoothProvider.availableDevices.isNotEmpty) ...[
-                    SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        itemCount: bluetoothProvider.availableDevices.length,
-                        itemBuilder: (context, index) {
-                          final device = bluetoothProvider.availableDevices[index].device;
-                          return Card(
-                            elevation: 4,
-                            margin: EdgeInsets.symmetric(vertical: 8.0),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                              leading: Icon(Icons.bluetooth, color: Theme.of(context).primaryColor),
-                              title: Text(
-                                device.name.isNotEmpty ? device.name : 'Unknown Device',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(device.remoteId.toString()),
-                              trailing: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                                ),
-                                onPressed: () {
-                                  bluetoothProvider.connectToDevice(device);
-                                },
-                                child: const Text("Connect", style: TextStyle(fontSize: 14)),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ] else ...[
-                    // Show message if no devices found
+                    const Center(child: CircularProgressIndicator()), // Show a loader during scanning
+                    const SizedBox(height: 16),
+                    // 🔹 Scan in progress text
                     Center(
                       child: Text(
-                        "No devices found.",
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        "Scanning for nearby devices...",
+                        style: TextStyle(color: Colors.blueGrey, fontSize: 16),
                       ),
                     ),
+                  ],
+
+                  // 🔹 Show available devices list or no device found message
+                  if (!bluetoothProvider.isScanning) ...[
+                    // If no device found after scanning
+                    if (!bluetoothProvider.isConnected) ...[
+                      const SizedBox(height: 16),
+                      // 🔹 Retry scan button
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14.0),
+                          minimumSize: const Size(double.infinity, 48),
+                          backgroundColor: Colors.orange.shade700, // Darker orange for better visibility
+                          textStyle: const TextStyle(fontSize: 16),
+                        ),
+                        onPressed: bluetoothProvider.isScanning
+                            ? null
+                            : () async {
+                                // Retry scanning if no device is found
+                                await bluetoothProvider.startScan(context);
+                              },
+                        child: const Text('Retry Scan'),
+                      ),
+                    ] else ...[
+                      // 🔹 If a device is found, show connected message
+                      Center(
+                        child: Text(
+                          "Device Connected: ${bluetoothProvider.deviceName}",
+                          style: TextStyle(fontSize: 18, color: Colors.green),
+                        ),
+                      ),
+                    ]
                   ],
                 ],
               ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/services.dart';
 import 'package:my_app/screens/setup_screen.dart';
+import 'package:my_app/screens/phone_verification_screen.dart';
 
 class StartScreen extends StatefulWidget {
   final Function changePage;
@@ -100,6 +101,16 @@ class _StartScreenState extends State<StartScreen> {
               'Welcome ${user.displayName}, you are logged in successfully!';
           _isLoading = false;
         });
+
+        // Fetch user profile information
+        String? name = user.displayName;
+        String? email = user.email;
+        String? phoneNumber = user.phoneNumber;
+
+        // Use the fetched information as needed
+        print('Name: $name');
+        print('Email: $email');
+        print('Phone Number: $phoneNumber');
 
         widget.changePage(1); // Navigate to the next screen
       } else {
@@ -263,34 +274,53 @@ class _StartScreenState extends State<StartScreen> {
   Future<void> _signUpWithEmailPassword() async {
     toggleLoading();
     try {
-      // Try to create a new user with the provided email and password
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      // Show success message
-      setState(() {
-        _responseMessage = 'Account created successfully';
-        _isLoading = false;
-      });
-
-      Navigator.pushReplacement(
+      final result = await Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => SetupScreen()),
+        MaterialPageRoute(
+          builder:
+              (context) => PhoneOTPVerification(
+                phoneNumber: _phoneController.text,
+              ), // Pass phoneNumber
+        ),
       );
+
+      if (result == true) {
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+              email: _emailController.text,
+              password: _passwordController.text,
+            );
+
+        await userCredential.user?.updateProfile(
+          displayName: _nameController.text,
+        );
+
+        setState(() {
+          _responseMessage =
+              'Account created and phone number verified successfully';
+          _isLoading = false;
+        });
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SetupScreen()),
+        );
+      } else {
+        setState(() {
+          _responseMessage = 'Phone number verification failed';
+          _isLoading = false;
+        });
+      }
     } on FirebaseAuthException catch (e) {
       setState(() {
         _isLoading = false;
       });
 
       if (e.code == 'email-already-in-use') {
-        // Show a dialog if the email is already in use
         _showErrorDialog(
           "This email address is already associated with another account.",
         );
       } else {
-        // Show any other error message
         _showErrorDialog("An error occurred: ${e.message}");
       }
     } catch (e) {
@@ -401,7 +431,7 @@ class _StartScreenState extends State<StartScreen> {
                           controller: _birthDateController,
                           readOnly: true,
                           decoration: InputDecoration(
-                            labelText: "Birth Date (YYYY-MM-DD)",
+                            labelText: "Birth Date (MM-DD-YYYY)",
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),

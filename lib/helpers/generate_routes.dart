@@ -12,7 +12,7 @@ import '../screens/home_screen.dart';
 import '../screens/navigation_controller.dart';
 import '../screens/statistics_screen.dart';
 
-Route<dynamic> generateRoutes(settings) {
+Route<dynamic> generateRoutes(RouteSettings settings) {
   switch (settings.name) {
     case ReminderTimesScreen.routeName:
       return PageTransition(
@@ -53,9 +53,11 @@ Route<dynamic> generateRoutes(settings) {
         settings: settings,
       );
     case UserProfileScreen.routeName: // Add UserProfileScreen route
+      final args = settings.arguments as Map<String, dynamic>?;
+      final phoneNumber = args?['phoneNumber'] ?? 'default-phone-number';
       return PageTransition(
         isIos: true,
-        child:  UserProfileScreen(),
+        child: UserProfileScreen(phoneNumber: phoneNumber),
         type: PageTransitionType.rightToLeftWithFade,
         settings: settings,
       );
@@ -69,18 +71,14 @@ Route<dynamic> generateRoutes(settings) {
     case HomeScreen.routeName:
       return PageTransition(
         isIos: true,
-        child: const NavigationController(
-          initIndex: 0,
-        ),
+        child: const NavigationController(initIndex: 0),
         type: PageTransitionType.rightToLeftWithFade,
         settings: settings,
       );
     case StatisticsScreen.routeName:
       return PageTransition(
         isIos: true,
-        child: const NavigationController(
-          initIndex: 1,
-        ),
+        child: const NavigationController(initIndex: 1),
         type: PageTransitionType.rightToLeftWithFade,
         settings: settings,
       );

@@ -10,8 +10,7 @@ import 'package:my_app/screens/navigation_controller.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:my_app/screens/startup_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:my_app/screens/phone_verification_screen.dart';
 import 'package:my_app/helpers/bluetooth_helper.dart'; // Import BluetoothHelper
 
 void main() async {
@@ -118,6 +117,7 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             color: Colors.white,
             debugShowCheckedModeBanner: false,
+
             title: 'Hydra8',
             themeMode: themeProvider.theme,
             darkTheme: MyThemes.darkTheme,

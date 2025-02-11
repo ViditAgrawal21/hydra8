@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_app/helpers/helpers.dart';
+import 'package:my_app/helpers/bluetooth_helper.dart'; // Import BluetoothHelper
 import 'package:my_app/models/DrinkAmount.dart';
+import 'package:provider/provider.dart'; // For accessing BluetoothHelper
 
 import '../widgets/homescreen-widgets/homescreen_main.dart';
 
@@ -22,21 +24,22 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback loadPreferences;
   final bool isActive;
 
-  const HomeScreen(
-      {required this.prevIsActive,
-      required this.loadPreferences,
-      required this.changeActive,
-      required this.changeSunny,
-      required this.isActive,
-      required this.isSunny,
-      required this.prevIsSunny,
-      required this.activeUnit,
-      required this.intakeAmount,
-      required this.setPrevIsActive,
-      required this.setPrevIsSunny,
-      required this.onAdd,
-      required this.drinksAmounts,
-      super.key});
+  const HomeScreen({
+    required this.prevIsActive,
+    required this.loadPreferences,
+    required this.changeActive,
+    required this.changeSunny,
+    required this.isActive,
+    required this.isSunny,
+    required this.prevIsSunny,
+    required this.activeUnit,
+    required this.intakeAmount,
+    required this.setPrevIsActive,
+    required this.setPrevIsSunny,
+    required this.onAdd,
+    required this.drinksAmounts,
+    super.key,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -110,6 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Fetch weight from BluetoothHelper
+    final bluetoothHelper = Provider.of<BluetoothHelper>(context);
+    final latestWeight = bluetoothHelper.weight; // Get the weight from Bluetooth
+
     final amountsList = widget.drinksAmounts.map((DrinkAmount element) {
       if (element.createdDate.year == DateTime.now().year &&
           element.createdDate.month == DateTime.now().month &&
@@ -136,7 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
           todaysDrinkAmount - (amountsList.isNotEmpty ? amountsList.last : 0);
       usePrevIntake = (widget.intakeAmount) +
           (widget.isActive ? intakeChangeDifference : 0) +
-          (widget.isSunny ? intakeChangeDifference : 0);
+          (widget.isSunny ? intakeChangeDifference : 0) +
+          latestWeight; // Include weight from Bluetooth in the intake calculation
     }
 
     final bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
@@ -175,4 +183,3 @@ class _HomeScreenState extends State<HomeScreen> {
         ));
   }
 }
-

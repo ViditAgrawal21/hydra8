@@ -22,13 +22,14 @@ class NavBar extends StatelessWidget {
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       child: Container(
-        height: 75,
+        height: 100,
         decoration: BoxDecoration(
           border: BorderDirectional(
             top: BorderSide(
-              color: isDarkTheme
-                  ? const Color(0xff4B4B4B)
-                  : const Color.fromRGBO(0, 0, 0, 0.1),
+              color:
+                  isDarkTheme
+                      ? const Color(0xff4B4B4B)
+                      : const Color.fromRGBO(0, 0, 0, 0.1),
             ),
           ),
         ),
@@ -44,10 +45,12 @@ class NavBar extends StatelessWidget {
                     splashFactory: NoSplash.splashFactory,
                   ),
                   onPressed: () async {
-                    final bool result = await Navigator.pushNamed(
-                      context,
-                      SettingsScreen.routeName,
-                    ) as bool;
+                    final bool result =
+                        await Navigator.pushNamed(
+                              context,
+                              SettingsScreen.routeName,
+                            )
+                            as bool;
                     if (result) {
                       loadPreferences();
                     }
@@ -58,23 +61,25 @@ class NavBar extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.settings,
-                          size: 28,
-                          color: activeIndex == 3
-                              ? isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black87
-                              : isDarkTheme
+                          size: 21,
+                          color:
+                              activeIndex == 3
+                                  ? isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black87
+                                  : isDarkTheme
                                   ? Colors.white38
                                   : const Color.fromRGBO(0, 0, 0, 0.3),
                         ),
                         Text(
                           "Settings",
                           style: TextStyle(
-                            color: activeIndex == 3
-                                ? isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black87
-                                : isDarkTheme
+                            color:
+                                activeIndex == 3
+                                    ? isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black87
+                                    : isDarkTheme
                                     ? Colors.white38
                                     : const Color.fromRGBO(0, 0, 0, 0.3),
                           ),
@@ -98,29 +103,32 @@ class NavBar extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushNamed(context, UserProfileScreen.routeName);
                   },
+
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.person,
-                          size: 28,
-                          color: activeIndex == 2
-                              ? isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black87
-                              : isDarkTheme
+                          size: 21,
+                          color:
+                              activeIndex == 2
+                                  ? isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black87
+                                  : isDarkTheme
                                   ? Colors.white38
                                   : const Color.fromRGBO(0, 0, 0, 0.3),
                         ),
                         Text(
                           "Profile",
                           style: TextStyle(
-                            color: activeIndex == 2
-                                ? isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black87
-                                : isDarkTheme
+                            color:
+                                activeIndex == 2
+                                    ? isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black87
+                                    : isDarkTheme
                                     ? Colors.white38
                                     : const Color.fromRGBO(0, 0, 0, 0.3),
                           ),
@@ -144,29 +152,32 @@ class NavBar extends StatelessWidget {
                   onPressed: () {
                     setPage(0);
                   },
+
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.apps,
-                          size: 28,
-                          color: activeIndex == 0
-                              ? isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black87
-                              : isDarkTheme
+                          size: 21,
+                          color:
+                              activeIndex == 0
+                                  ? isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black87
+                                  : isDarkTheme
                                   ? Colors.white38
                                   : const Color.fromRGBO(0, 0, 0, 0.3),
                         ),
                         Text(
                           "Home",
                           style: TextStyle(
-                            color: activeIndex == 0
-                                ? isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black87
-                                : isDarkTheme
+                            color:
+                                activeIndex == 0
+                                    ? isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black87
+                                    : isDarkTheme
                                     ? Colors.white38
                                     : const Color.fromRGBO(0, 0, 0, 0.3),
                           ),
@@ -177,7 +188,6 @@ class NavBar extends StatelessWidget {
                 ),
               ),
             ),
-
             // Statistics
             Expanded(
               child: Tooltip(
@@ -190,29 +200,32 @@ class NavBar extends StatelessWidget {
                   onPressed: () {
                     setPage(1);
                   },
+
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.bar_chart,
-                          size: 28,
-                          color: activeIndex == 1
-                              ? isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black87
-                              : isDarkTheme
+                          size: 21,
+                          color:
+                              activeIndex == 1
+                                  ? isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black87
+                                  : isDarkTheme
                                   ? Colors.white38
                                   : const Color.fromRGBO(0, 0, 0, 0.3),
                         ),
                         Text(
                           "Statistics",
                           style: TextStyle(
-                            color: activeIndex == 1
-                                ? isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black87
-                                : isDarkTheme
+                            color:
+                                activeIndex == 1
+                                    ? isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black87
+                                    : isDarkTheme
                                     ? Colors.white38
                                     : const Color.fromRGBO(0, 0, 0, 0.3),
                           ),

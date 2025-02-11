@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/helpers/bluetooth_helper.dart'; // Import the BluetoothHelper
 import 'package:my_app/helpers/helpers.dart';
 import 'package:my_app/models/DrinkAmount.dart';
 import 'package:my_app/widgets/homescreen-widgets/recent_drinks.dart';
-
+import 'package:provider/provider.dart'; // For accessing BluetoothHelper
 import 'progress.dart';
 
 class HomescreenMain extends StatelessWidget {
@@ -37,86 +38,112 @@ class HomescreenMain extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TopActions(
-          activeUnit: activeUnit,
-          loadPreferences: loadPreferences,
-          isSunny: isSunny,
-          sunnyIntakeChange: sunnyIntakeChange,
-          intakeAmount: intakeAmount,
+    return Consumer<BluetoothHelper>(
+      builder: (context, bluetoothHelper, child) {
+        final latestWeight = bluetoothHelper.weight.toDouble(); // Ensure it's a double
+
+        // Adjust the water intake calculation based on bottle weight and conditions
+        final adjustedIntakeAmount = calculateAdjustedIntake(
+          intakeAmount: intakeAmount.toDouble(), // Convert to double
+          latestWeight: latestWeight,
           isActive: isActive,
-          activeIntakeChange: activeIntakeChange,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: SizedBox(
-              height:
-                  MediaQuery.of(context).size.height -
-                  AppBar().preferredSize.height -
-                  kBottomNavigationBarHeight,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(),
-                  SizedBox(
-                    width:
-                        MediaQuery.of(context).size.width < 450
+          isSunny: isSunny,
+          activeUnit: activeUnit,
+        );
+
+        return Column(
+          children: [
+            TopActions(
+              activeUnit: activeUnit,
+              loadPreferences: loadPreferences,
+              isSunny: isSunny,
+              sunnyIntakeChange: sunnyIntakeChange,
+              intakeAmount: adjustedIntakeAmount.toInt(), // Convert to int
+              isActive: isActive,
+              activeIntakeChange: activeIntakeChange,
+            ),
+            Expanded(
+              child: SafeArea(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height -
+                      AppBar().preferredSize.height -
+                      kBottomNavigationBarHeight,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width < 450
                             ? MediaQuery.of(context).size.width
                             : 450,
-                    height:
-                        MediaQuery.of(context).size.width < 450
+                        height: MediaQuery.of(context).size.width < 450
                             ? MediaQuery.of(context).size.width
                             : 450,
-                    child: Progress(
-                      activeUnit: activeUnit,
-                      prevAmount: prevAmount,
-                      prevIntake: prevIntake,
-                      intakeAmount:
-                          int.parse(intakeAmount.toString()) +
-                          (isSunny
-                              ? getIntakeChangeDifference(activeUnit)
-                              : 0) +
-                          (isActive
-                              ? getIntakeChangeDifference(activeUnit)
-                              : 0),
-                      todaysAmount: todaysDrinkAmount,
-                    ),
-                  ),
-                  drinkAmounts.isEmpty
-                      ? const SizedBox(height: 110)
-                      : RecentDrinks(
-                        onAdd: onAdd,
-                        recentDrinks:
-                            drinkAmounts.length < 2
-                                ? drinkAmounts.reversed.toList()
-                                : drinkAmounts.length >= 5
-                                ? drinkAmounts
-                                    .sublist(
-                                      drinkAmounts.length - 4,
-                                      drinkAmounts.length,
-                                    )
-                                    .reversed
-                                    .toList()
-                                : drinkAmounts
-                                    .sublist(0, drinkAmounts.length)
-                                    .reversed
-                                    .toList(),
+                        child: Progress(
+                          activeUnit: activeUnit,
+                          prevAmount: prevAmount,
+                          prevIntake: prevIntake,
+                          intakeAmount: adjustedIntakeAmount.toInt(), // Convert to int
+                          todaysAmount: todaysDrinkAmount,
+                        ),
                       ),
-                ],
+                      drinkAmounts.isEmpty
+                          ? const SizedBox(height: 110)
+                          : RecentDrinks(
+                              onAdd: onAdd,
+                              recentDrinks: drinkAmounts.length < 2
+                                  ? drinkAmounts.reversed.toList()
+                                  : drinkAmounts.length >= 5
+                                      ? drinkAmounts.sublist(
+                                          drinkAmounts.length - 4,
+                                          drinkAmounts.length,
+                                        )
+                                      .reversed
+                                      .toList()
+                                      : drinkAmounts
+                                          .sublist(0, drinkAmounts.length)
+                                          .reversed
+                                          .toList(),
+                            ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
+  }
+
+  // Function to calculate adjusted intake amount based on weight and conditions
+  double calculateAdjustedIntake({
+    required double intakeAmount, // intakeAmount should be double
+    required double latestWeight, // Ensure it's a double
+    required bool isActive,
+    required bool isSunny,
+    required String activeUnit,
+  }) {
+    double adjustedIntake = intakeAmount + latestWeight; // Base intake + weight from Bluetooth
+
+    // Adjust intake based on activity
+    if (isActive) {
+      adjustedIntake += getIntakeChangeDifference(activeUnit); // Adjust based on unit
+    }
+
+    // Adjust intake based on sunny weather
+    if (isSunny) {
+      adjustedIntake += getIntakeChangeDifference(activeUnit); // Adjust based on unit
+    }
+
+    return adjustedIntake;
   }
 }
 
 class TopActions extends StatelessWidget {
   final bool isSunny;
   final bool isActive;
-  final int intakeAmount;
+  final int intakeAmount; // intakeAmount is now an int
   final Function sunnyIntakeChange;
   final Function activeIntakeChange;
   final VoidCallback loadPreferences;
