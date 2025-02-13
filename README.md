@@ -1,6 +1,6 @@
 # Hydra8 - Smart Hydration Tracker
 
-Hydra8 is a smart hydration tracking app that helps users monitor their daily water intake and optimize their hydration based on various factors such as weather conditions and physical activity. The app integrates with a smart water bottle via Bluetooth to provide real-time tracking and insights.
+Hydra8 is a smart hydration tracking app that helps users monitor their daily water intake and optimize their hydration based on various factors such as weather conditions and physical activity. The app integrates with a smart water device via Bluetooth to provide real-time tracking and insights.
 
 ## Features
 
